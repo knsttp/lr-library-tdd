@@ -20,3 +20,9 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/books/{book}', 'BooksController@show');
+Route::post('/books', 'BooksController@store');
+Route::patch('/books/{book}', 'BooksController@update');
+Route::delete('/books/{book}', 'BooksController@destroy');
+Route::get('/author/{author}', 'AuthorController@show');
+Route::post('/author', 'AuthorController@store');
