@@ -13,12 +13,16 @@ class BookManagmentTest extends TestCase
     use RefreshDatabase;
     use WithFaker;
     
+    public function book_data(){
+        return [
+            'title' => $this->faker->sentence(3),
+            'author_id' => 11,
+        ];
+    }
+    
     public function test_book_can_be_created(){
-        
-        $response = $this->post('/books',[
-            'title'  => $this->faker->sentence(3),
-            'author' => $this->faker->name,
-        ]);
+        $this->withExceptionHandling();
+        $response = $this->post('/books',$this->book_data() );
         $book = Book::first();
         
         $this->assertCount(1, Book::all());
@@ -26,10 +30,7 @@ class BookManagmentTest extends TestCase
     }
 
     public function test_book_can_be_read(){
-        $this->post('/books',[
-            'title'  => $this->faker->sentence(3),
-            'author' => $this->faker->name,
-        ]);
+        $this->post('/books',$this->book_data() );
         $book = Book::first();
         
         $response = $this->get('/books/'.$book->id);
@@ -37,10 +38,7 @@ class BookManagmentTest extends TestCase
     }
 
     public function test_book_can_be_delete(){
-        $this->post('/books',[
-            'title'  => $this->faker->sentence(3),
-            'author' => $this->faker->name,
-        ]);
+        $this->post('/books',$this->book_data() );
         $book = Book::first();
         $this->assertCount(1, Book::all());
         
@@ -54,39 +52,30 @@ class BookManagmentTest extends TestCase
         
         $this->withoutExceptionHandling();
         
-        $this->post('/books',[
-            'title'  => 'Cool Book Title',
-            'author' => 'Victor',
-        ]);
+        $this->post('/books',$this->book_data());
         $book = Book::first();
         
         $response = $this->patch('/books/'.$book->id,[
             'title'  => 'New title',
-            'author' => 'New author',
+            'author_id' => 6,
         ]);
         
         $this->assertEquals('New title', Book::first()->title);
-        $this->assertEquals('New author', Book::first()->author);
+        $this->assertEquals(6, Book::first()->author_id);
         
         $response->assertRedirect('/books/'.$book->id);
     }    
     
     public function test_book_title_is_required(){
         
-        $response = $this->post('/books',[
-            'title'  => '',
-            'author' => 'Victor',
-        ]);
+        $response = $this->post('/books', array_merge($this->book_data(), ['title' => '']));
         $response->assertSessionHasErrors('title');
     }
     
     public function test_book_author_is_required(){
         
-        $response = $this->post('/books',[
-            'title'  => 'Cool Book Title',
-            'author' => '',
-        ]);
-        $response->assertSessionHasErrors('author');
+        $response = $this->post('/books', array_merge($this->book_data(), ['author_id' => '']));
+        $response->assertSessionHasErrors('author_id');
     }
     
 }
