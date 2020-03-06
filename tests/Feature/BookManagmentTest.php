@@ -6,6 +6,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Book;
+use App\User;
+use App\Reservation;
 
 class BookManagmentTest extends TestCase
 {
@@ -76,6 +78,31 @@ class BookManagmentTest extends TestCase
         
         $response = $this->post('/books', array_merge($this->book_data(), ['author_id' => '']));
         $response->assertSessionHasErrors('author_id');
+    }
+    
+    public function test_book_can_be_checked_out_by_signed_in_user() {
+        $book = factory(Book::class)->create();
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->post('/checkout/'.$book->id);     
+        $this->assertCount(1, Reservation::all());
+        $reservation = Reservation::where('book_id',$book->id)->where('user_id',$user->id)->first();
+        $this->assertEquals( $user->id, $reservation->user_id );
+        $this->assertEquals( $book->id, $reservation->book_id );
+        $this->assertEquals( now(), $reservation->checked_out_at );
+        $response->assertRedirect('/books');
+    }
+    
+    public function test_book_cant_be_checked_out_by_without_authorization() {
+        $book = factory(Book::class)->create();
+        $response = $this->post('/checkout/'.$book->id);     
+        $response->assertRedirect('/login');
+    }
+    
+    public function test_unknown_book_cant_be_checkout() {
+        $user = factory(User::class)->create();
+        $book_id = 123;
+        $response = $this->actingAs($user)->post('/checkout/'.$book_id);     
+        $response->assertStatus(404);
     }
     
 }

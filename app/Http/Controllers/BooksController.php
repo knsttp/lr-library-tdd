@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Book;
+use Illuminate\Support\Facades\Auth;
 
 class BooksController extends Controller
 {
+    public function __construct() {
+        $this->middleware('auth')->except(['index']);
+    }    
+    
     public function validateRequest() {
         return request()->validate([
             'title' => 'required',
@@ -27,8 +31,15 @@ class BooksController extends Controller
         $book->update($this->validateRequest());
         return redirect('/books/'.$book->id);
     }
+    
     public function destroy(Book $book) {
         $book->delete();
+        return redirect('/books');
+    }
+    
+    public function checkout(Book $book){
+        $user = Auth::user();
+        $book->checkout($user);
         return redirect('/books');
     }
     
