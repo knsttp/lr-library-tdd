@@ -16,7 +16,7 @@ class BookManagmentTest extends TestCase
     use RefreshDatabase;
     use WithFaker;
     
-    public function book_data(){
+    private function data(){
         return [
             'title' => $this->faker->sentence(3),
             'author_id' => 11,
@@ -25,7 +25,7 @@ class BookManagmentTest extends TestCase
     
     public function test_book_can_be_created(){
         $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/books',$this->book_data() );
+        $response = $this->actingAs($user)->post('/books',$this->data() );
         $book = Book::first();
         
         $this->assertCount(1, Book::all());
@@ -34,7 +34,7 @@ class BookManagmentTest extends TestCase
 
     public function test_book_can_be_read(){
         $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/books',$this->book_data() );
+        $response = $this->actingAs($user)->post('/books',$this->data() );
         $book = Book::first();
         
         $response = $this->get('/books/'.$book->id);
@@ -43,7 +43,7 @@ class BookManagmentTest extends TestCase
 
     public function test_book_can_be_delete(){
         $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/books',$this->book_data() );
+        $response = $this->actingAs($user)->post('/books',$this->data() );
         $book = Book::first();
         $this->assertCount(1, Book::all());
         
@@ -55,7 +55,7 @@ class BookManagmentTest extends TestCase
     
     public function test_book_can_be_updated(){
         $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/books',$this->book_data());
+        $response = $this->actingAs($user)->post('/books',$this->data());
         $book = Book::first();
         
         $response = $this->patch('/books/'.$book->id,[
@@ -71,13 +71,13 @@ class BookManagmentTest extends TestCase
     
     public function test_book_title_is_required(){
         $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/books', array_merge($this->book_data(), ['title' => '']));
+        $response = $this->actingAs($user)->post('/books', array_merge($this->data(), ['title' => '']));
         $response->assertSessionHasErrors('title');
     }
     
     public function test_book_author_is_required(){
         $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/books', array_merge($this->book_data(), ['author_id' => '']));
+        $response = $this->actingAs($user)->post('/books', array_merge($this->data(), ['author_id' => '']));
         $response->assertSessionHasErrors('author_id');
     }
     
