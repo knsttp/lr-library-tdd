@@ -23,7 +23,7 @@ class Book extends Model
              ->first();
         
         if(is_null($reservation)){
-            throw new \App\Exception();
+            throw new \Exception();
         }
         
         $reservation->update([

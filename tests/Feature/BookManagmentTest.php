@@ -23,8 +23,8 @@ class BookManagmentTest extends TestCase
     }
     
     public function test_book_can_be_created(){
-        $this->withExceptionHandling();
-        $response = $this->post('/books',$this->book_data() );
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->post('/books',$this->book_data() );
         $book = Book::first();
         
         $this->assertCount(1, Book::all());
@@ -32,7 +32,8 @@ class BookManagmentTest extends TestCase
     }
 
     public function test_book_can_be_read(){
-        $this->post('/books',$this->book_data() );
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->post('/books',$this->book_data() );
         $book = Book::first();
         
         $response = $this->get('/books/'.$book->id);
@@ -40,7 +41,8 @@ class BookManagmentTest extends TestCase
     }
 
     public function test_book_can_be_delete(){
-        $this->post('/books',$this->book_data() );
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->post('/books',$this->book_data() );
         $book = Book::first();
         $this->assertCount(1, Book::all());
         
@@ -51,10 +53,8 @@ class BookManagmentTest extends TestCase
     }
     
     public function test_book_can_be_updated(){
-        
-        $this->withoutExceptionHandling();
-        
-        $this->post('/books',$this->book_data());
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->post('/books',$this->book_data());
         $book = Book::first();
         
         $response = $this->patch('/books/'.$book->id,[
@@ -69,14 +69,14 @@ class BookManagmentTest extends TestCase
     }    
     
     public function test_book_title_is_required(){
-        
-        $response = $this->post('/books', array_merge($this->book_data(), ['title' => '']));
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->post('/books', array_merge($this->book_data(), ['title' => '']));
         $response->assertSessionHasErrors('title');
     }
     
     public function test_book_author_is_required(){
-        
-        $response = $this->post('/books', array_merge($this->book_data(), ['author_id' => '']));
+        $user = factory(User::class)->create();
+        $response = $this->actingAs($user)->post('/books', array_merge($this->book_data(), ['author_id' => '']));
         $response->assertSessionHasErrors('author_id');
     }
     
@@ -91,6 +91,16 @@ class BookManagmentTest extends TestCase
         $this->assertEquals( now(), $reservation->checked_out_at );
         $response->assertRedirect('/books');
     }
+    
+    public function test_if_not_checked_out_exception_is_thrown(){
+        
+        $this->expectException(\Exception::class);
+        
+        $book = factory(Book::class)->create();
+        $user = factory(User::class)->create();
+        
+        $book->checkin($user);
+    }    
     
     public function test_book_cant_be_checked_out_by_without_authorization() {
         $book = factory(Book::class)->create();
