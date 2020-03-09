@@ -43,4 +43,14 @@ class BooksController extends Controller
         return redirect('/books');
     }
     
+    public function checkin(Book $book){
+        $user = Auth::user();
+        try{
+            $book->checkin($user);
+        } catch(\Exception $e){
+            return response([],404);
+        }
+        return redirect('/books');
+    }
+    
 }

@@ -2,12 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Book;
+use App\Reservation;
+use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
-use App\Book;
-use App\User;
-use App\Reservation;
 
 class BookManagmentTest extends TestCase
 {
@@ -102,10 +103,32 @@ class BookManagmentTest extends TestCase
         $book->checkin($user);
     }    
     
-    public function test_book_cant_be_checked_out_by_without_authorization() {
+    public function test_book_cant_be_checked_out_without_authorization() {
         $book = factory(Book::class)->create();
         $response = $this->post('/checkout/'.$book->id);     
         $response->assertRedirect('/login');
+    }
+    
+    public function test_only_signed_in_users_can_checkin_book(){
+        $user = factory(User::class)->create();
+        $book = factory(Book::class)->create();
+        $this->actingAs($user)->post('/checkout/'.$book->id);
+        
+        Auth::logout();
+        
+        $this->post('/checkin/'.$book->id)->assertRedirect('/login');
+        $this->assertCount(1, Reservation::all());
+        $this->assertNull(Reservation::first()->checked_in_at);
+        
+    }
+    
+    public function test_404_if_book_isnt_checked_out_first() {
+        $this->withoutExceptionHandling();
+        $book = factory(Book::class)->create();
+        $user = factory(User::class)->create();
+        
+        $response = $this->actingAs($user)->post('/checkin/'.$book->id);
+        $response->assertStatus(404);
     }
     
     public function test_unknown_book_cant_be_checkout() {
