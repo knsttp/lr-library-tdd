@@ -89,7 +89,7 @@ class BookManagmentTest extends TestCase
         $reservation = Reservation::where('book_id',$book->id)->where('user_id',$user->id)->first();
         $this->assertEquals( $user->id, $reservation->user_id );
         $this->assertEquals( $book->id, $reservation->book_id );
-        $this->assertEquals( now(), $reservation->checked_out_at );
+        $this->assertNotNull( $reservation->checked_out_at );
         $response->assertRedirect('/books');
     }
     
