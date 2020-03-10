@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header">{{ $book->title }}</div>
                 <div class="card-body">
-                    {{ $book->author }}
+                    Author: {{ $book->author->name }}
                 </div>
             </div>
         </div>

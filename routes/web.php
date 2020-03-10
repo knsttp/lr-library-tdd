@@ -13,8 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', 'BooksController@index')->name('books');
+Route::get('/books', function () {
+    return redirect()->route('books');
 });
 
 Auth::routes();
@@ -26,5 +27,5 @@ Route::patch('/books/{book}', 'BooksController@update');
 Route::delete('/books/{book}', 'BooksController@destroy');
 Route::get('/authors/{author}', 'AuthorController@show');
 Route::post('/authors', 'AuthorController@store');
-Route::post('/checkout/{book}', 'BooksController@checkout');
-Route::post('/checkin/{book}', 'BooksController@checkin');
+Route::get('/checkout/{book}', 'BooksController@checkout');
+Route::get('/checkin/{book}', 'BooksController@checkin');

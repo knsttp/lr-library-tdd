@@ -31,6 +31,12 @@ class BookManagmentTest extends TestCase
         $this->assertCount(1, Book::all());
         $response->assertRedirect('/books/'.$book->id);
     }
+    
+    public function test_unsigned_user_can_see_books(){
+        $books = factory(Book::class,10)->create();
+        $this->assertCount(10, Book::all());
+        $this->get('/')->assertSee($books[0]->title);
+    }
 
     public function test_book_can_be_read(){
         $user = factory(User::class)->create();
@@ -84,7 +90,7 @@ class BookManagmentTest extends TestCase
     public function test_book_can_be_checked_out_by_signed_in_user() {
         $book = factory(Book::class)->create();
         $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/checkout/'.$book->id);     
+        $response = $this->actingAs($user)->get('/checkout/'.$book->id);     
         $this->assertCount(1, Reservation::all());
         $reservation = Reservation::where('book_id',$book->id)->where('user_id',$user->id)->first();
         $this->assertEquals( $user->id, $reservation->user_id );
@@ -92,6 +98,16 @@ class BookManagmentTest extends TestCase
         $this->assertNotNull( $reservation->checked_out_at );
         $response->assertRedirect('/books');
     }
+    
+    public function test_if_multiple_checked_out_exception_is_thrown(){
+        
+        $this->expectException(\Exception::class);
+        
+        $book = factory(Book::class)->create();
+        $user = factory(User::class)->create();
+        $book->checkout($user);
+        $book->checkout($user);
+    }    
     
     public function test_if_not_checked_out_exception_is_thrown(){
         
@@ -105,18 +121,18 @@ class BookManagmentTest extends TestCase
     
     public function test_book_cant_be_checked_out_without_authorization() {
         $book = factory(Book::class)->create();
-        $response = $this->post('/checkout/'.$book->id);     
+        $response = $this->get('/checkout/'.$book->id);     
         $response->assertRedirect('/login');
     }
     
     public function test_only_signed_in_users_can_checkin_book(){
         $user = factory(User::class)->create();
         $book = factory(Book::class)->create();
-        $this->actingAs($user)->post('/checkout/'.$book->id);
+        $this->actingAs($user)->get('/checkout/'.$book->id);
         
         Auth::logout();
         
-        $this->post('/checkin/'.$book->id)->assertRedirect('/login');
+        $this->get('/checkin/'.$book->id)->assertRedirect('/login');
         $this->assertCount(1, Reservation::all());
         $this->assertNull(Reservation::first()->checked_in_at);
         
@@ -127,14 +143,14 @@ class BookManagmentTest extends TestCase
         $book = factory(Book::class)->create();
         $user = factory(User::class)->create();
         
-        $response = $this->actingAs($user)->post('/checkin/'.$book->id);
+        $response = $this->actingAs($user)->get('/checkin/'.$book->id);
         $response->assertStatus(404);
     }
     
     public function test_unknown_book_cant_be_checkout() {
         $user = factory(User::class)->create();
         $book_id = 123;
-        $response = $this->actingAs($user)->post('/checkout/'.$book_id);     
+        $response = $this->actingAs($user)->get('/checkout/'.$book_id);     
         $response->assertStatus(404);
     }
     

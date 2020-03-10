@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class BooksController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth')->except(['index']);
+        $this->middleware('auth')->except(['index','show']);
     }    
     
     public function validateRequest() {
@@ -16,6 +16,11 @@ class BooksController extends Controller
             'title' => 'required',
             'author_id' => 'required'
         ]);
+    }
+    
+    public function index() {
+       $books = Book::all(); 
+       return view('books.index',compact('books'));
     }
     
     public function show(Book $book) {
