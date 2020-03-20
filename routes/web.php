@@ -21,6 +21,7 @@ Route::get('/books', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/history', 'HomeController@history');
 Route::get('/books/{book}', 'BooksController@show');
 Route::post('/books', 'BooksController@store');
 Route::patch('/books/{book}', 'BooksController@update');

@@ -50,6 +50,10 @@ class Book extends Model
         return (!$has_reservation || $checkin) ? true : false;
         
     }
+
+    public function users(){
+        return $this->belongsToMany('App\User', 'reservations');
+    }
     
     public function reservations() {
         return $this->hasMany(Reservation::class);
