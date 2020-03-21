@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,7 +27,10 @@ Route::get('/books/{book}', 'BooksController@show');
 Route::post('/books', 'BooksController@store');
 Route::patch('/books/{book}', 'BooksController@update');
 Route::delete('/books/{book}', 'BooksController@destroy');
-Route::get('/authors/{author}', 'AuthorController@show');
 Route::post('/authors', 'AuthorController@store');
-Route::get('/checkout/{book}', 'BooksController@checkout');
-Route::get('/checkin/{book}', 'BooksController@checkin');
+Route::get('/authors/{author}', 'AuthorController@show');
+
+Route::group(['middleware' => ['auth', 'admin']], function() {
+    Route::get('/checkout/{book}/{user}', 'BooksController@checkout');
+    Route::get('/checkin/{book}/{user}', 'BooksController@checkin');
+});

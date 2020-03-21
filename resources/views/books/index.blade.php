@@ -9,21 +9,13 @@
                     <tr>
                         <th>Title</th>
                         <th>Author</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>    
                 <tbody>
                 @foreach ($books as $book)
                 <tr>
-                    <td>{{ $book->title }}</td>
+                    <td><a href="{{ url('/books/'.$book->id) }}">{{ $book->title }}</a></td>
                     <td>{{ $book->author->name }}</td>
-                    <td>
-                        @auth
-                        <a href="{{ url('/checkout/'.$book->id) }}" class="btn btn-primary">Check Out</a>
-                        <a href="{{ url('/checkin/'.$book->id) }}" class="btn btn-primary">Check In</a>
-                        @endauth
-                        <a href="{{ url('/books/'.$book->id) }}" class="btn btn-primary">Details</a>
-                    </td>
                 </tr>
                 @endforeach
                 </tbody>    

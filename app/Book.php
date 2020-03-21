@@ -10,7 +10,7 @@ class Book extends Model
     protected $fillable = ['title','author_id'];
     
     public function checkout(User $user) {
-        $reservation = $this->reservations()->where('user_id', $user->id)->first();
+        $reservation = $this->reservations()->where('user_id', $user->id)->whereNull('checked_in_at')->first();
         
         if($reservation){
             throw new \Exception();

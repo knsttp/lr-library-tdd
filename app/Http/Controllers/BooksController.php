@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Book;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 
 class BooksController extends Controller
@@ -42,14 +43,12 @@ class BooksController extends Controller
         return redirect('/books');
     }
     
-    public function checkout(Book $book){
-        $user = Auth::user();
+    public function checkout(Book $book, User $user){
         $book->checkout($user);
         return redirect('/books');
     }
     
-    public function checkin(Book $book){
-        $user = Auth::user();
+    public function checkin(Book $book, User $user){
         try{
             $book->checkin($user);
         } catch(\Exception $e){

@@ -16,13 +16,19 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <td>Book Name</td><td>Checked Out At</td>
+                                <td>Book</td>
+                                <td>User</td>
+                                <td>Checked Out At</td>
+                                <td>Actions</td>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($reservations as $reservation)
                             <tr>
-                                <td><a href="{{ url('/books/'.$reservation->book->id) }}">{{ $reservation->book->title }}</a></td><td>{{ $reservation->checked_out_at }}</td>
+                                <td><a href="{{ url('/books/'.$reservation->book->id) }}">{{ $reservation->book->title }}</a></td>
+                                <td>{{ $reservation->user->name }}</td>
+                                <td>{{ $reservation->checked_out_at }}</td>
+                                <td><a class="btn btn-primary" href="{{ url('/checkin/'.$reservation->book->id) }}">Return book</a></td>
                             </tr>
                             @endforeach
                         </tbody>

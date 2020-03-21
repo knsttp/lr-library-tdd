@@ -34,7 +34,8 @@ class AuthorManagmentTest extends TestCase
     }
     
     public function test_author_can_be_created() {
-        $user = factory(User::class)->create();
+        // $this->withExceptionHandling();
+        $user = factory(User::class)->create(['email'=>'user@example.com']);
         $response = $this->actingAs($user)->post('/authors', $this->data());
         $author = Author::first();
         

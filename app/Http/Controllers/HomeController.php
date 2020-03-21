@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Reservation;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,8 +25,15 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $reservations = Reservation::with('book')->where('user_id', '=', $user->id)->whereNull('checked_in_at')->orderBy('checked_in_at','asc')->get();
-        return view('user-dashboard/home', compact('reservations'));
+        
+        if( $user->is_admin ) {
+            $reservations = Reservation::with('book')->with('user')->whereNull('checked_in_at')->orderBy('checked_in_at','asc')->get();
+            return view('admin-dashboard/home', compact('reservations'));
+        } else {
+            $reservations = Reservation::with('book')->where('user_id', '=', $user->id)->whereNull('checked_in_at')->orderBy('checked_in_at','asc')->get();
+            return view('user-dashboard/home', compact('reservations'));
+        }
+
     }
     
     public function history(){

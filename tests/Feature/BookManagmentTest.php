@@ -90,7 +90,8 @@ class BookManagmentTest extends TestCase
     public function test_book_can_be_checked_out_by_signed_in_user() {
         $book = factory(Book::class)->create();
         $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->get('/checkout/'.$book->id);     
+        $admin = factory(User::class)->create(['is_admin'=>1]);
+        $response = $this->actingAs($admin)->get('/checkout/'.$book->id.'/'.$user->id);     
         $this->assertCount(1, Reservation::all());
         $reservation = Reservation::where('book_id',$book->id)->where('user_id',$user->id)->first();
         $this->assertEquals( $user->id, $reservation->user_id );
@@ -121,18 +122,20 @@ class BookManagmentTest extends TestCase
     
     public function test_book_cant_be_checked_out_without_authorization() {
         $book = factory(Book::class)->create();
-        $response = $this->get('/checkout/'.$book->id);     
+        $user = factory(User::class)->create();
+        $response = $this->get('/checkout/'.$book->id.'/'.$user->id);     
         $response->assertRedirect('/login');
     }
     
-    public function test_only_signed_in_users_can_checkin_book(){
+    public function test_only_admin_can_checkin_book(){
         $user = factory(User::class)->create();
+        $admin = factory(User::class)->create(['is_admin'=>1]);
         $book = factory(Book::class)->create();
-        $this->actingAs($user)->get('/checkout/'.$book->id);
+        $this->actingAs($admin)->get('/checkout/'.$book->id.'/'.$user->id);
         
         Auth::logout();
         
-        $this->get('/checkin/'.$book->id)->assertRedirect('/login');
+        $this->get('/checkin/'.$book->id.'/'.$user->id)->assertRedirect('/login');
         $this->assertCount(1, Reservation::all());
         $this->assertNull(Reservation::first()->checked_in_at);
         
@@ -141,9 +144,10 @@ class BookManagmentTest extends TestCase
     public function test_404_if_book_isnt_checked_out_first() {
         $this->withoutExceptionHandling();
         $book = factory(Book::class)->create();
+        $admin = factory(User::class)->create(['is_admin'=>1]);
         $user = factory(User::class)->create();
         
-        $response = $this->actingAs($user)->get('/checkin/'.$book->id);
+        $response = $this->actingAs($admin)->get('/checkin/'.$book->id.'/'.$user->id);
         $response->assertStatus(404);
     }
     

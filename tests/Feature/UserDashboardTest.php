@@ -18,9 +18,10 @@ class UserDashboardTest extends TestCase
     
     public function test_dashboard_show_user_books_to_return(){
         $book = factory(Book::class)->create();
-        $user = factory(User::class)->create(['email'=>'user@example.com']);
+        $admin = factory(User::class)->create(['is_admin'=>1]);
+        $user = factory(User::class)->create();
         
-        $this->actingAs($user)->get('/checkout/'.$book->id); 
+        $this->actingAs($admin)->get('/checkout/'.$book->id.'/'.$user->id); 
         $this->assertCount(1, Reservation::all());
         $this->assertNull(Reservation::first()->checked_in_at);
         
@@ -33,10 +34,11 @@ class UserDashboardTest extends TestCase
         $this->withoutExceptionHandling();
         $book  = factory(Book::class)->create();
         $book2 = factory(Book::class)->create();
-        $user  = factory(User::class)->create(['email'=>'user@example.com']);
-        $this->actingAs($user)->get('/checkout/'.$book->id); 
-        $this->actingAs($user)->get('/checkout/'.$book2->id); 
-        $this->actingAs($user)->get('/checkin/'.$book->id); 
+        $user  = factory(User::class)->create();
+        $admin  = factory(User::class)->create(['is_admin'=>1]);
+        $this->actingAs($admin)->get('/checkout/'.$book->id.'/'.$user->id); 
+        $this->actingAs($admin)->get('/checkout/'.$book2->id.'/'.$user->id); 
+        $this->actingAs($admin)->get('/checkin/'.$book->id.'/'.$user->id); 
         
         $response = $this->actingAs($user)->get('/history');
         $response->assertSuccessful();
