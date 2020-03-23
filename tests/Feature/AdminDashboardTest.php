@@ -38,5 +38,5 @@ class AdminDashboardTest extends TestCase
         $response->assertSeeText($book1->title);
         $response->assertDontSeeText($book2->title);
     }
-    
+
 }

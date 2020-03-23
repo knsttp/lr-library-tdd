@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Book;
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class BooksController extends Controller
 {
@@ -16,6 +17,13 @@ class BooksController extends Controller
         return request()->validate([
             'title' => 'required',
             'author_id' => 'required'
+        ]);
+    }
+    
+    public function validateCheckoutRequest() {
+        return request()->validate([
+            'user_id' => 'required',
+            'book_id' => 'required'
         ]);
     }
     
@@ -43,9 +51,14 @@ class BooksController extends Controller
         return redirect('/books');
     }
     
-    public function checkout(Book $book, User $user){
+    // public function checkout(Book $book, User $user){
+    public function checkout(){
+        $user_id = request()->input('user_id');
+        $book_id = request()->input('book_id');
+        $user = User::find($user_id);
+        $book = Book::find($user_id);
         $book->checkout($user);
-        return redirect('/books');
+        return redirect('/home');
     }
     
     public function checkin(Book $book, User $user){

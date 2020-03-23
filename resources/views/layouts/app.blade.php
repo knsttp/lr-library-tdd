@@ -35,7 +35,11 @@
                     <ul class="navbar-nav mr-auto">
                         @auth
                         <li class="nav-item"><a class="nav-link" href="{{ url('/home') }}">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url('/history') }}">History</a></li>
+                        @if (Auth::user()->is_admin)
+                            <li class="nav-item"><a class="nav-link" href="{{ url('/books') }}">Books</a></li>
+                        @else
+                            <li class="nav-item"><a class="nav-link" href="{{ url('/history') }}">History</a></li>
+                        @endif
                         @endauth
                     </ul>
 
