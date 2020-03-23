@@ -1,3 +1,18 @@
+# Library Managment
+
+Laravel project written in an TDD(Testing Driven Development) approach
+
+## Features
+
+### Admin user
+
+* Show books to return 
+* Books checkout / checkin
+
+### Regular user
+
+* Show books to return
+
 ## Setup
 
 ### Dependencies
