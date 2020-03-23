@@ -22,21 +22,21 @@ class AuthorManagmentTest extends TestCase
     }
     
     public function test_author_dob_is_required(){
-        $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/authors', array_merge($this->data(), ['dob' => '']));
+        $admin = factory(User::class)->create(['is_admin' => 1]);
+        $response = $this->actingAs($admin)->post('/authors', array_merge($this->data(), ['dob' => '']));
         $response->assertSessionHasErrors('dob');
     }
     
     public function test_author_name_is_required(){
-        $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/authors', array_merge($this->data(), ['name' => '']));
+        $admin = factory(User::class)->create(['is_admin' => 1]);
+        $response = $this->actingAs($admin)->post('/authors', array_merge($this->data(), ['name' => '']));
         $response->assertSessionHasErrors('name');
     }
     
     public function test_author_can_be_created() {
         // $this->withExceptionHandling();
-        $user = factory(User::class)->create(['email'=>'user@example.com']);
-        $response = $this->actingAs($user)->post('/authors', $this->data());
+        $admin = factory(User::class)->create(['is_admin' => 1]);
+        $response = $this->actingAs($admin)->post('/authors', $this->data());
         $author = Author::first();
         
         $this->assertCount(1, Author::all() );

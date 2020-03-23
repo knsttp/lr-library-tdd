@@ -24,8 +24,8 @@ class BookManagmentTest extends TestCase
     }
     
     public function test_book_can_be_created(){
-        $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/books',$this->data() );
+        $admin = factory(User::class)->create(['is_admin' => 1]);
+        $response = $this->actingAs($admin)->post('/books',$this->data() );
         $book = Book::first();
         
         $this->assertCount(1, Book::all());
@@ -39,7 +39,7 @@ class BookManagmentTest extends TestCase
     }
 
     public function test_book_can_be_read(){
-        $user = factory(User::class)->create();
+        $user = factory(User::class)->create(['is_admin' => 1]);
         $response = $this->actingAs($user)->post('/books',$this->data() );
         $book = Book::first();
         
@@ -48,7 +48,7 @@ class BookManagmentTest extends TestCase
     }
 
     public function test_book_can_be_delete(){
-        $user = factory(User::class)->create();
+        $user = factory(User::class)->create(['is_admin' => 1]);
         $response = $this->actingAs($user)->post('/books',$this->data() );
         $book = Book::first();
         $this->assertCount(1, Book::all());
@@ -60,7 +60,7 @@ class BookManagmentTest extends TestCase
     }
     
     public function test_book_can_be_updated(){
-        $user = factory(User::class)->create();
+        $user = factory(User::class)->create(['is_admin' => 1]);
         $response = $this->actingAs($user)->post('/books',$this->data());
         $book = Book::first();
         
@@ -76,28 +76,28 @@ class BookManagmentTest extends TestCase
     }    
     
     public function test_book_title_is_required(){
-        $user = factory(User::class)->create();
+        $user = factory(User::class)->create(['is_admin' => 1]);
         $response = $this->actingAs($user)->post('/books', array_merge($this->data(), ['title' => '']));
         $response->assertSessionHasErrors('title');
     }
     
     public function test_book_author_is_required(){
-        $user = factory(User::class)->create();
-        $response = $this->actingAs($user)->post('/books', array_merge($this->data(), ['author_id' => '']));
+        $admin = factory(User::class)->create(['is_admin' => 1]);
+        $response = $this->actingAs($admin)->post('/books', array_merge($this->data(), ['author_id' => '']));
         $response->assertSessionHasErrors('author_id');
     }
     
     public function test_book_can_be_checked_out_by_signed_in_user() {
         $book = factory(Book::class)->create();
         $user = factory(User::class)->create();
-        $admin = factory(User::class)->create(['is_admin'=>1]);
-        $response = $this->actingAs($admin)->get('/checkout/'.$book->id.'/'.$user->id);     
+        $admin = factory(User::class)->create(['is_admin' => 1]);
+        $response = $this->actingAs($admin)->postJson('/checkout', ['book_id' => $book->id, 'user_id' => $user->id]); 
         $this->assertCount(1, Reservation::all());
         $reservation = Reservation::where('book_id',$book->id)->where('user_id',$user->id)->first();
         $this->assertEquals( $user->id, $reservation->user_id );
         $this->assertEquals( $book->id, $reservation->book_id );
         $this->assertNotNull( $reservation->checked_out_at );
-        $response->assertRedirect('/books');
+        $response->assertRedirect('/home');
     }
     
     public function test_if_multiple_checked_out_exception_is_thrown(){
@@ -121,17 +121,18 @@ class BookManagmentTest extends TestCase
     }    
     
     public function test_book_cant_be_checked_out_without_authorization() {
+        $this->withExceptionHandling();
         $book = factory(Book::class)->create();
         $user = factory(User::class)->create();
-        $response = $this->get('/checkout/'.$book->id.'/'.$user->id);     
-        $response->assertRedirect('/login');
+        $response = $this->postJson('/checkout', ['book_id' => $book->id, 'user_id' => $user->id]);  
+        $response->assertStatus(401);
     }
     
     public function test_only_admin_can_checkin_book(){
         $user = factory(User::class)->create();
         $admin = factory(User::class)->create(['is_admin'=>1]);
         $book = factory(Book::class)->create();
-        $this->actingAs($admin)->get('/checkout/'.$book->id.'/'.$user->id);
+        $this->actingAs($admin)->postJson('/checkout', ['book_id' => $book->id, 'user_id' => $user->id]);
         
         Auth::logout();
         
@@ -142,19 +143,11 @@ class BookManagmentTest extends TestCase
     }
     
     public function test_404_if_book_isnt_checked_out_first() {
-        $this->withoutExceptionHandling();
         $book = factory(Book::class)->create();
         $admin = factory(User::class)->create(['is_admin'=>1]);
         $user = factory(User::class)->create();
         
         $response = $this->actingAs($admin)->get('/checkin/'.$book->id.'/'.$user->id);
-        $response->assertStatus(404);
-    }
-    
-    public function test_unknown_book_cant_be_checkout() {
-        $user = factory(User::class)->create();
-        $book_id = 123;
-        $response = $this->actingAs($user)->get('/checkout/'.$book_id);     
         $response->assertStatus(404);
     }
     

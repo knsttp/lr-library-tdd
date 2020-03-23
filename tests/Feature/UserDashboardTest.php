@@ -21,7 +21,7 @@ class UserDashboardTest extends TestCase
         $admin = factory(User::class)->create(['is_admin'=>1]);
         $user = factory(User::class)->create();
         
-        $this->actingAs($admin)->get('/checkout/'.$book->id.'/'.$user->id); 
+        $this->actingAs($admin)->postJson('/checkout', ['book_id' => $book->id, 'user_id' => $user->id]);
         $this->assertCount(1, Reservation::all());
         $this->assertNull(Reservation::first()->checked_in_at);
         
@@ -36,8 +36,8 @@ class UserDashboardTest extends TestCase
         $book2 = factory(Book::class)->create();
         $user  = factory(User::class)->create();
         $admin  = factory(User::class)->create(['is_admin'=>1]);
-        $this->actingAs($admin)->get('/checkout/'.$book->id.'/'.$user->id); 
-        $this->actingAs($admin)->get('/checkout/'.$book2->id.'/'.$user->id); 
+        $this->actingAs($admin)->postJson('/checkout', ['book_id' => $book->id, 'user_id' => $user->id]);
+        $this->actingAs($admin)->postJson('/checkout', ['book_id' => $book2->id, 'user_id' => $user->id]);
         $this->actingAs($admin)->get('/checkin/'.$book->id.'/'.$user->id); 
         
         $response = $this->actingAs($user)->get('/history');

@@ -56,7 +56,7 @@ class BooksController extends Controller
         $user_id = request()->input('user_id');
         $book_id = request()->input('book_id');
         $user = User::find($user_id);
-        $book = Book::find($user_id);
+        $book = Book::find($book_id);
         $book->checkout($user);
         return redirect('/home');
     }

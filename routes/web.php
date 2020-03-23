@@ -27,7 +27,6 @@ Route::get('/authors/{author}', 'AuthorController@show');
 Route::get('/history', 'HomeController@history');
 
 Route::group(['middleware' => ['auth', 'admin']], function() {
-    Route::get('/checkout/{book}/{user}', 'BooksController@checkout');
     Route::post('/checkout', 'BooksController@checkout');
     Route::get('/checkin/{book}/{user}', 'BooksController@checkin');
     Route::post('/authors', 'AuthorController@store');
